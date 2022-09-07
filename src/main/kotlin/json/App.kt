@@ -1,4 +1,5 @@
 package json
+import json.core.*
 
 fun main() {
     val jsonResponse = """
@@ -230,8 +231,12 @@ fun main() {
     ]
 }
 """
-    val jsonLexAnalyzer = JsonLexAnalyzerImpl()
-    val result = jsonLexAnalyzer.analyze(jsonResponse)
-    val parser = JsonParser()
-    val jsonData = parser.parse(result)
+    val arr = "[1,2,3,4,5,6,7]"
+
+    val jsonObj = try {
+        JsonArrayImpl(arr)
+    }
+    catch (e: Exception){
+        println(e)
+    }
 }

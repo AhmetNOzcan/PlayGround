@@ -10,23 +10,36 @@ class JsonParser {
     var globalIndex = 0
     var depth = 0
 
-    fun parse(list: List<JsonToken>): JsonElement {
-        var jsonElement: JsonElement? = null
-        val firstToken = list.first()
+    fun parse(list: List<JsonToken>, jsonElement: JsonElement? = null): JsonElement {
+        val element = when (list.first()) {
+                is BeginObjectToken -> {
+                    if (jsonElement != null && jsonElement !is JsonObjectInternal){
+                        throw Exception()
+                    }
+                    else if (jsonElement is JsonObjectInternal) {
+                        jsonElement
+                    }
+                    else {
+                        JsonObjectImpl()
+                    }
+                }
+                is BeginArrayToken -> {
+                    if (jsonElement != null && jsonElement !is JsonArrayInternal){
+                        throw Exception()
+                    }
+                    else if (jsonElement is JsonArrayInternal) {
+                        jsonElement
+                    }
+                    else {
+                        JsonArrayImpl()
+                    }
+                }
+                else -> {
+                    null
+                }
+            }
 
-        jsonElement = when (firstToken) {
-            is BeginObjectToken -> {
-                JsonObjectImpl()
-            }
-            is BeginArrayToken -> {
-                JsonArrayImpl()
-            }
-            else -> {
-                null
-            }
-        }
-
-        val result = processToken(list, jsonElement!!)
+        val result = processToken(list, element!!)
         if (depth != 0) {
             throw Exception("Unclosed json structure")
         }
@@ -35,7 +48,7 @@ class JsonParser {
 
     private fun processToken(list: List<JsonToken>, jsonElement: JsonElement): JsonElement {
         depth++
-        while (globalIndex < list.size) {
+        while (globalIndex < list.size - 1) {
             globalIndex++
             val prevJsonToken = list[globalIndex - 1]
             when (val currentToken = list[globalIndex]) {

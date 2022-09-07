@@ -1,8 +1,16 @@
 package json.core
 
-internal class JsonObjectImpl: JsonObjectInternal {
+import json.BeginObjectToken
+import json.JsonLexAnalyzerImpl
+import json.JsonParser
+
+internal class JsonObjectImpl(): JsonObjectInternal {
     private val items = mutableMapOf<String, JsonElement>()
     private var currentKey: String = ""
+
+    constructor(json: String): this() {
+        parse(json)
+    }
 
     override fun beginAdd(key: String) {
         if (currentKey.isNotEmpty()) {
@@ -12,31 +20,27 @@ internal class JsonObjectImpl: JsonObjectInternal {
     }
 
     override fun endAdd(value: JsonElement) {
+        if (currentKey.isEmpty()) {
+            throw Exception("No key defined!")
+        }
         items[currentKey] = value
         currentKey = ""
     }
 
-    override fun getString(key: String): String {
-        return items[key]?.let {
-            (it as? JsonStringValue)?.value
-        } ?: throw Exception("")
+    override fun get(key: String): JsonElement? {
+        return items[key]
     }
 
-    override fun getInt(key: String): Int {
-        return items[key]?.let {
-            (it as? JsonIntegerValue)?.value
-        } ?: throw Exception("")
-    }
+    private fun parse(json: String) {
+        val lexAnalyzer = JsonLexAnalyzerImpl()
+        val lexResult = lexAnalyzer.analyze(json)
 
-    override fun getBoolean(key: String): Boolean {
-        return items[key]?.let {
-            (it as? JsonBooleanValue)?.value
-        } ?: throw Exception("")
-    }
-
-    override fun getDouble(key: String): Double {
-        return items[key]?.let {
-            (it as? JsonDoubleValue)?.value
-        } ?: throw Exception("")
+        if (lexResult.first() is BeginObjectToken){
+            val parser = JsonParser()
+            parser.parse(lexResult, this)
+        }
+        else {
+            throw Exception("Excepted BeginObject!")
+        }
     }
 }
