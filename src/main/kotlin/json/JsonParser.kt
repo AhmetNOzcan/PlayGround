@@ -166,6 +166,17 @@ class JsonParser {
                         throw Exception("Unexpected object")
                     }
                 }
+                NullToken -> {
+                    if (jsonElement is JsonObjectInternal && prevJsonToken is SemiColon) {
+                        jsonElement.endAdd(JsonNullValue)
+                    }
+                    else if (jsonElement is JsonArrayInternal && (prevJsonToken is CommaToken || prevJsonToken is BeginArrayToken)) {
+                        jsonElement.items.add(JsonNullValue)
+                    }
+                    else {
+                        throw Exception("Unexpected object")
+                    }
+                }
             }
         }
 

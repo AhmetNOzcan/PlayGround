@@ -18,6 +18,8 @@ interface JsonBooleanValue: JsonValue {
     var value: Boolean
 }
 
+object JsonNullValue: JsonValue
+
 class JsonStringValueImpl(override var value: String): JsonStringValue
 
 class JsonIntegerValueImpl(override var value: Int) : JsonIntegerValue

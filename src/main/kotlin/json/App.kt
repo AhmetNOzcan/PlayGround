@@ -1,5 +1,6 @@
 package json
 import json.core.*
+import java.util.Date
 
 fun main() {
     val jsonResponse = """
@@ -231,12 +232,20 @@ fun main() {
     ]
 }
 """
-    val arr = "[1,2,3,4,5,6,7]"
-
-    val jsonObj = try {
-        JsonArrayImpl(arr)
+    val start = Date().time
+    val obj = try {
+        JsonObjectImpl("""
+            {
+                "name": true,
+                "firstName": null,
+                "arr":[1, null, 2, 3, 4]
+            }
+        """.trimIndent())
     }
     catch (e: Exception){
         println(e)
+        null
     }
+    val end = Date().time
+    println(end - start)
 }
